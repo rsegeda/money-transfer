@@ -1,0 +1,230 @@
+{
+  "info": {
+    "_postman_id": "47230bd4-e116-4b28-8c38-52dd7bf39857",
+    "name": "accounts",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "accounts GET a",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts/c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts",
+            "c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts GET d",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts/13cae66e-c378-11e9-9cb5-2a2ae2dbcce4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts",
+            "13cae66e-c378-11e9-9cb5-2a2ae2dbcce4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts A transfer D 400",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts/c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4/transfer?receiver=13cae66e-c378-11e9-9cb5-2a2ae2dbcce4&sum=400",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts",
+            "c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4",
+            "transfer"
+          ],
+          "query": [
+            {
+              "key": "receiver",
+              "value": "13cae66e-c378-11e9-9cb5-2a2ae2dbcce4"
+            },
+            {
+              "key": "sum",
+              "value": "400"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts D transfer A 500",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sender\": \"13cae66e-c378-11e9-9cb5-2a2ae2dbcce4\",\n    \"receiver\": \"c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4\",\n    \"sum\": \"500\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4567/transfers",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "transfers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts POST ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"ownerUuid\": \"dd987832-e946-4a6e-8fea-61e9b7ea49b7\",\n    \"balance\": \"9000\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts GET all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts PUT d balance",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"balance\": \"5000\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts/13cae66e-c378-11e9-9cb5-2a2ae2dbcce4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts",
+            "13cae66e-c378-11e9-9cb5-2a2ae2dbcce4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "accounts DELETE a",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:4567/accounts/c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4567",
+          "path": [
+            "accounts",
+            "c87ce318-c2d4-11e9-9cb5-2a2ae2dbcce4"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
