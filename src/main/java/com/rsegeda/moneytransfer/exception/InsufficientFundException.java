@@ -10,7 +10,7 @@ import java.util.UUID;
 public class InsufficientFundException extends RuntimeException {
 
   public InsufficientFundException(UUID uuid, BigDecimal sum) {
-    super(String.format("Account %s has not enough funds to withdraw %s credits", uuid,
+    super(String.format("Account %s has not enough funds to transfer %s credits", uuid,
         sum.toString()));
   }
 }

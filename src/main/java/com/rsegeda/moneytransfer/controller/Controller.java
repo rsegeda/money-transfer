@@ -9,11 +9,13 @@ import com.rsegeda.moneytransfer.controller.dto.TransferDto;
 import com.rsegeda.moneytransfer.controller.response.BodyResponse;
 import com.rsegeda.moneytransfer.controller.response.StatusResponse;
 import com.rsegeda.moneytransfer.service.AccountService;
+import com.rsegeda.moneytransfer.service.TransferService;
 
 import javax.inject.Inject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Response;
 import spark.Request;
@@ -23,12 +25,11 @@ import static spark.Spark.*;
 @Slf4j
 public class Controller {
 
+  @Setter(onMethod = @__( {@Inject}))
   private AccountService accountService;
 
-  @Inject
-  public void setAccountService(AccountService accountService) {
-    this.accountService = accountService;
-  }
+  @Setter(onMethod = @__( {@Inject}))
+  private TransferService transferService;
 
   public void init() {
     get("/healthCheck", (req, res) -> "Service is alive");
@@ -148,8 +149,8 @@ public class Controller {
 
     try {
       TransferDto transferDto = new Gson().fromJson(req.body(), TransferDto.class);
-      BodyResponse orderResult = accountService
-          .requestTransfer(transferDto)
+      BodyResponse orderResult = transferService
+          .transfer(transferDto)
           .thenApply(balanceLeft -> new BodyResponse(StatusResponse.SUCCESSFUL,
               String.format("Funds left: %s", balanceLeft.toString())))
           .exceptionally(throwable -> {

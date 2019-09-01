@@ -8,6 +8,7 @@ import com.rsegeda.moneytransfer.controller.dto.AccountDto;
 import com.rsegeda.moneytransfer.controller.dto.TransferDto;
 import com.rsegeda.moneytransfer.exception.AccountServiceException;
 import com.rsegeda.moneytransfer.service.AccountService;
+import com.rsegeda.moneytransfer.service.TransferService;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -22,11 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import spark.Request;
 import spark.Response;
@@ -42,6 +41,9 @@ class ControllerTest {
   AccountService accountServiceMock;
 
   @Mock
+  TransferService transferServiceMock;
+
+  @Mock
   Request requestMock;
 
   @Mock
@@ -53,20 +55,21 @@ class ControllerTest {
   @Captor
   ArgumentCaptor<TransferDto> transferDtoArgumentCaptor;
 
-  @Spy
-  @InjectMocks
-  Controller controllerSpy;
+  private Controller controller;
 
   @BeforeEach
   void setup() {
     MockitoAnnotations.initMocks(this);
+    controller = new Controller();
+    controller.setAccountService(accountServiceMock);
+    controller.setTransferService(transferServiceMock);
   }
 
   @Test
   void deleteAccount() {
     when(requestMock.params(":uuid")).thenReturn("exampleUuid");
     doNothing().when(accountServiceMock).deleteAccount(anyString());
-    controllerSpy.deleteAccount(requestMock, responseMock);
+    controller.deleteAccount(requestMock, responseMock);
 
     verify(accountServiceMock).deleteAccount("exampleUuid");
   }
@@ -75,7 +78,7 @@ class ControllerTest {
   void deleteAccountResponseStatus() {
     when(requestMock.params(":uuid")).thenReturn("exampleUuid");
     doNothing().when(accountServiceMock).deleteAccount(anyString());
-    controllerSpy.deleteAccount(requestMock, responseMock);
+    controller.deleteAccount(requestMock, responseMock);
 
     verify(responseMock).status(204);
   }
@@ -89,7 +92,7 @@ class ControllerTest {
     doNothing().when(responseMock).type("application/json");
     when(requestMock.params(":uuid")).thenReturn(exampleUuid);
     when(accountServiceMock.getAccount(exampleUuid)).thenReturn(CompletableFuture.completedFuture(accountDto));
-    String result = controllerSpy.getAccount(requestMock, responseMock);
+    String result = controller.getAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithAccountDto(accountDto), result);
   }
@@ -104,7 +107,7 @@ class ControllerTest {
     when(requestMock.params(":uuid")).thenReturn(exampleUuid);
     when(accountServiceMock.getAccount(exampleUuid)).thenReturn(CompletableFuture.completedFuture(accountDto));
 
-    controllerSpy.getAccount(requestMock, responseMock);
+    controller.getAccount(requestMock, responseMock);
 
     verify(responseMock).status(200);
   }
@@ -120,7 +123,7 @@ class ControllerTest {
     failedFuture.completeExceptionally(expectedException);
     when(accountServiceMock.getAccount(exampleUuid)).thenReturn(failedFuture);
 
-    String result = controllerSpy.getAccount(requestMock, responseMock);
+    String result = controller.getAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -136,7 +139,7 @@ class ControllerTest {
     failedFuture.completeExceptionally(expectedException);
     when(accountServiceMock.getAccount(exampleUuid)).thenReturn(failedFuture);
 
-    controllerSpy.getAccount(requestMock, responseMock);
+    controller.getAccount(requestMock, responseMock);
 
     verify(responseMock).status(404);
   }
@@ -149,7 +152,7 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Not found");
     when(accountServiceMock.getAccount(exampleUuid)).thenThrow(expectedException);
 
-    String result = controllerSpy.getAccount(requestMock, responseMock);
+    String result = controller.getAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -162,7 +165,7 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Not found");
     when(accountServiceMock.getAccount(exampleUuid)).thenThrow(expectedException);
 
-    controllerSpy.getAccount(requestMock, responseMock);
+    controller.getAccount(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -180,7 +183,7 @@ class ControllerTest {
     when(accountServiceMock.updateAccount(eq(exampleUuid), accountDtoArgumentCaptor.capture()))
         .thenThrow(expectedException);
 
-    String result = controllerSpy.putAccount(requestMock, responseMock);
+    String result = controller.putAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -198,7 +201,7 @@ class ControllerTest {
     when(accountServiceMock.updateAccount(eq(exampleUuid), accountDtoArgumentCaptor.capture()))
         .thenThrow(expectedException);
 
-    controllerSpy.putAccount(requestMock, responseMock);
+    controller.putAccount(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -218,7 +221,7 @@ class ControllerTest {
     when(accountServiceMock.updateAccount(eq(exampleUuid), accountDtoArgumentCaptor.capture()))
         .thenReturn(failedFuture);
 
-    String result = controllerSpy.putAccount(requestMock, responseMock);
+    String result = controller.putAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -235,7 +238,7 @@ class ControllerTest {
     when(accountServiceMock.updateAccount(eq(exampleUuid), accountDtoArgumentCaptor.capture()))
         .thenReturn(CompletableFuture.completedFuture(accountDto));
 
-    String result = controllerSpy.putAccount(requestMock, responseMock);
+    String result = controller.putAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithAccountDto(accountDto), result);
   }
@@ -255,7 +258,7 @@ class ControllerTest {
 
     doNothing().when(responseMock).type("application/json");
     when(accountServiceMock.getAccounts()).thenReturn(CompletableFuture.completedFuture(accountDtoList));
-    String result = controllerSpy.getAccounts(requestMock, responseMock);
+    String result = controller.getAccounts(requestMock, responseMock);
 
     Assertions.assertEquals(
         getDeserializedResponseDtoWithArrayOfAccountDto(accountDtoList), result);
@@ -277,7 +280,7 @@ class ControllerTest {
     doNothing().when(responseMock).type("application/json");
     when(accountServiceMock.getAccounts()).thenReturn(CompletableFuture.completedFuture(accountDtoList));
 
-    controllerSpy.getAccounts(requestMock, responseMock);
+    controller.getAccounts(requestMock, responseMock);
 
     verify(responseMock).status(200);
   }
@@ -290,7 +293,7 @@ class ControllerTest {
     failedFuture.completeExceptionally(expectedException);
     when(accountServiceMock.getAccounts()).thenReturn(failedFuture);
 
-    String result = controllerSpy.getAccounts(requestMock, responseMock);
+    String result = controller.getAccounts(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -303,7 +306,7 @@ class ControllerTest {
     failedFuture.completeExceptionally(expectedException);
     when(accountServiceMock.getAccounts()).thenReturn(failedFuture);
 
-    controllerSpy.getAccounts(requestMock, responseMock);
+    controller.getAccounts(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -313,7 +316,7 @@ class ControllerTest {
     doNothing().when(responseMock).type("application/json");
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
     when(accountServiceMock.getAccounts()).thenThrow(expectedException);
-    String result = controllerSpy.getAccounts(requestMock, responseMock);
+    String result = controller.getAccounts(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -324,7 +327,7 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
     when(accountServiceMock.getAccounts()).thenThrow(expectedException);
 
-    controllerSpy.getAccounts(requestMock, responseMock);
+    controller.getAccounts(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -338,7 +341,7 @@ class ControllerTest {
     doNothing().when(responseMock).type("application/json");
     when(accountServiceMock.addAccount(accountDtoArgumentCaptor.capture())).thenReturn(CompletableFuture.completedFuture(accountDto));
 
-    String result = controllerSpy.postAccount(requestMock, responseMock);
+    String result = controller.postAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithAccountDto(accountDto), result);
   }
@@ -356,7 +359,7 @@ class ControllerTest {
     when(accountServiceMock.addAccount(accountDtoArgumentCaptor.capture()))
         .thenReturn(failedFuture);
 
-    String result = controllerSpy.postAccount(requestMock, responseMock);
+    String result = controller.postAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -371,7 +374,7 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Not found");
     when(accountServiceMock.addAccount(accountDtoArgumentCaptor.capture())).thenThrow(expectedException);
 
-    String result = controllerSpy.postAccount(requestMock, responseMock);
+    String result = controller.postAccount(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -386,7 +389,7 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Not found");
     when(accountServiceMock.addAccount(accountDtoArgumentCaptor.capture())).thenThrow(expectedException);
 
-    controllerSpy.postAccount(requestMock, responseMock);
+    controller.postAccount(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -398,9 +401,9 @@ class ControllerTest {
 
     Mockito.when(requestMock.body()).thenReturn(new Gson().toJson(transferDto));
     doNothing().when(responseMock).type("application/json");
-    when(accountServiceMock.requestTransfer(transferDtoArgumentCaptor.capture())).thenReturn(CompletableFuture.completedFuture(BigDecimal.ZERO));
+    when(transferServiceMock.transfer(transferDtoArgumentCaptor.capture())).thenReturn(CompletableFuture.completedFuture(BigDecimal.ZERO));
 
-    String result = controllerSpy.requestTransfer(requestMock, responseMock);
+    String result = controller.requestTransfer(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDto(), result);
   }
@@ -415,9 +418,9 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
     CompletableFuture<BigDecimal> failedFuture = new CompletableFuture<>();
     failedFuture.completeExceptionally(expectedException);
-    when(accountServiceMock.requestTransfer(transferDtoArgumentCaptor.capture())).thenReturn(failedFuture);
+    when(transferServiceMock.transfer(transferDtoArgumentCaptor.capture())).thenReturn(failedFuture);
 
-    String result = controllerSpy.requestTransfer(requestMock, responseMock);
+    String result = controller.requestTransfer(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -432,9 +435,9 @@ class ControllerTest {
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
     CompletableFuture<BigDecimal> failedFuture = new CompletableFuture<>();
     failedFuture.completeExceptionally(expectedException);
-    when(accountServiceMock.requestTransfer(transferDtoArgumentCaptor.capture())).thenReturn(failedFuture);
+    when(transferServiceMock.transfer(transferDtoArgumentCaptor.capture())).thenReturn(failedFuture);
 
-    controllerSpy.requestTransfer(requestMock, responseMock);
+    controller.requestTransfer(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }
@@ -447,9 +450,9 @@ class ControllerTest {
     Mockito.when(requestMock.body()).thenReturn(new Gson().toJson(transferDto));
     doNothing().when(responseMock).type("application/json");
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
-    when(accountServiceMock.requestTransfer(transferDtoArgumentCaptor.capture())).thenThrow(expectedException);
+    when(transferServiceMock.transfer(transferDtoArgumentCaptor.capture())).thenThrow(expectedException);
 
-    String result = controllerSpy.requestTransfer(requestMock, responseMock);
+    String result = controller.requestTransfer(requestMock, responseMock);
 
     Assertions.assertEquals(getDeserializedResponseDtoWithThrowable(expectedException), result);
   }
@@ -462,9 +465,9 @@ class ControllerTest {
     Mockito.when(requestMock.body()).thenReturn(new Gson().toJson(transferDto));
     doNothing().when(responseMock).type("application/json");
     AccountServiceException expectedException = new AccountServiceException("Unknown issue");
-    when(accountServiceMock.requestTransfer(transferDtoArgumentCaptor.capture())).thenThrow(expectedException);
+    when(transferServiceMock.transfer(transferDtoArgumentCaptor.capture())).thenThrow(expectedException);
 
-    controllerSpy.requestTransfer(requestMock, responseMock);
+    controller.requestTransfer(requestMock, responseMock);
 
     verify(responseMock).status(500);
   }

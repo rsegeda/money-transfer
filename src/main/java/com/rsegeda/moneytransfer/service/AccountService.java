@@ -5,16 +5,13 @@
 package com.rsegeda.moneytransfer.service;
 
 import com.rsegeda.moneytransfer.controller.dto.AccountDto;
-import com.rsegeda.moneytransfer.controller.dto.TransferDto;
 import com.rsegeda.moneytransfer.exception.AccountServiceException;
 import com.rsegeda.moneytransfer.exception.AccountUpdateException;
 import com.rsegeda.moneytransfer.exception.AccountWasNotFoundException;
-import com.rsegeda.moneytransfer.exception.InsufficientFundException;
 import com.rsegeda.moneytransfer.service.model.Account;
 
 import javax.inject.Inject;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -23,10 +20,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.google.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
 
 @Slf4j
+@Singleton
 public class AccountService {
 
   private final ConcurrentHashMap<UUID, Account> accounts;
@@ -88,49 +87,8 @@ public class AccountService {
   }
 
   Account findAccount(UUID uuid) {
-    return Optional.ofNullable(accounts.get(uuid))
+    return Optional.ofNullable(this.accounts.get(uuid))
         .orElseThrow(() -> new AccountWasNotFoundException(uuid.toString()));
-  }
-
-  CompletableFuture<BigDecimal> topUpAccount(Account account, BigDecimal sum) {
-    return CompletableFuture.supplyAsync(() -> {
-      for (; ; ) {
-        BigDecimal oldVal = account.getBalance().get();
-
-        if (account.getBalance().compareAndSet(oldVal, oldVal.add(sum))) {
-          return account.getBalance().get();
-        }
-      }
-    });
-  }
-
-  CompletableFuture<BigDecimal> withdrawFromAccount(Account account, BigDecimal sum) {
-    return CompletableFuture.supplyAsync(() -> {
-      for (; ; ) {
-        BigDecimal oldVal = account.getBalance().get();
-
-        if (oldVal.compareTo(sum) < 0) {
-          throw new InsufficientFundException(account.getUuid(), sum);
-        }
-
-        if (account.getBalance().compareAndSet(oldVal, oldVal.subtract(sum))) {
-          return account.getBalance().get();
-        }
-      }
-    });
-  }
-
-  public CompletableFuture<BigDecimal> requestTransfer(TransferDto transferDto) {
-    BigDecimal sum = transferDto.getSum();
-    Account senderAccount = findAccount(transferDto.getSender());
-    Account receiverAccount = findAccount(transferDto.getReceiver());
-
-    return withdrawFromAccount(senderAccount, sum).thenApply(senderFundsLeft -> {
-      topUpAccount(receiverAccount, sum).thenAccept(
-          receiverNewBalance -> log.info(String.format("Account top up: %s with %s credits",
-              receiverAccount.getUuid().toString(), sum.toString())));
-      return senderFundsLeft;
-    });
   }
 
   Account updateAccountDetails(Account updatedAccount, Account updaterAccount) throws AccountUpdateException {

@@ -6,10 +6,8 @@ package com.rsegeda.moneytransfer.service;
 
 import com.rsegeda.moneytransfer.TestUtils;
 import com.rsegeda.moneytransfer.controller.dto.AccountDto;
-import com.rsegeda.moneytransfer.controller.dto.TransferDto;
 import com.rsegeda.moneytransfer.exception.AccountServiceException;
 import com.rsegeda.moneytransfer.exception.AccountUpdateException;
-import com.rsegeda.moneytransfer.exception.InsufficientFundException;
 import com.rsegeda.moneytransfer.service.model.Account;
 
 import java.math.BigDecimal;
@@ -29,7 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.rsegeda.moneytransfer.TestUtils.*;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,49 +39,14 @@ class AccountServiceTest {
   AccountDto accountDtoMock;
   @Mock
   private AccountMapper accountMapperMock;
-  private AccountService accountServiceSpy;
+
+  private AccountService accountService;
 
   @BeforeEach
   void beforeEach() {
     MockitoAnnotations.initMocks(this);
-    accountServiceSpy = Mockito.spy(new AccountService(TestUtils.generateTestAccounts()));
-    accountServiceSpy.setAccountMapper(accountMapperMock);
-  }
-
-  @Test
-  void topUpAccount() throws ExecutionException, InterruptedException {
-    Account account = TestUtils.getAccountWithBalance(new BigDecimal(1000));
-    BigDecimal before = account.getBalance().get();
-    BigDecimal sum = new BigDecimal(666);
-    BigDecimal balanceExpected = before.add(sum);
-
-    CompletableFuture<BigDecimal> result = accountServiceSpy.topUpAccount(account, sum);
-
-    Assertions.assertEquals(balanceExpected, result.get());
-  }
-
-  @Test
-  void withdraw() throws ExecutionException, InterruptedException {
-    Account account = TestUtils.getAccountWithBalance(new BigDecimal(1000));
-    BigDecimal before = account.getBalance().get();
-    BigDecimal sum = new BigDecimal(666);
-    BigDecimal balanceExpected = before.subtract(sum);
-
-    CompletableFuture<BigDecimal> result = accountServiceSpy.withdrawFromAccount(account, sum);
-    Assertions.assertEquals(balanceExpected, result.get());
-  }
-
-  @Test
-  void withdrawInsufficientFunds() {
-    Account account = TestUtils.getAccountWithBalance(new BigDecimal(1000));
-    BigDecimal sum = new BigDecimal(1666);
-
-    CompletableFuture<BigDecimal> result = accountServiceSpy.withdrawFromAccount(account, sum);
-
-    result.exceptionallyAsync(e -> {
-      Assertions.assertTrue(e.getCause() instanceof InsufficientFundException);
-      return BigDecimal.ZERO;
-    });
+    accountService = new AccountService(TestUtils.generateTestAccounts());
+    accountService.setAccountMapper(accountMapperMock);
   }
 
   @Test
@@ -91,7 +54,7 @@ class AccountServiceTest {
     Account to = TestUtils.getAccountWithBalance(BigDecimal.ZERO);
     Account from = TestUtils.getAccountWithBalance(BigDecimal.TEN);
 
-    accountServiceSpy.updateAccountDetails(to, from);
+    accountService.updateAccountDetails(to, from);
 
     Assertions.assertNotEquals(to.getUuid(), from.getUuid());
   }
@@ -101,19 +64,17 @@ class AccountServiceTest {
     Account to = TestUtils.getAccountWithBalance(BigDecimal.ZERO);
     Account from = TestUtils.getAccountWithBalance(BigDecimal.TEN);
 
-    accountServiceSpy.updateAccountDetails(to, from);
+    accountService.updateAccountDetails(to, from);
 
     Assertions.assertNotEquals(to.getUuid(), from.getUuid());
   }
 
   @Test
   void getAccount() throws ExecutionException, InterruptedException {
-    String uuid = UUID.randomUUID().toString();
+    when(accountMapperMock.toDto(any())).thenReturn(accountDtoMock);
 
-    doReturn(accountMock).when(accountServiceSpy).findAccount(UUID.fromString(uuid));
-    when(accountMapperMock.toDto(accountMock)).thenReturn(accountDtoMock);
-
-    CompletableFuture<AccountDto> result = accountServiceSpy.getAccount(uuid);
+    CompletableFuture<AccountDto> result =
+        accountService.getAccount(A_ACCOUNT.getUuid().toString());
 
     Assertions.assertNotNull(result.get());
   }
@@ -122,12 +83,13 @@ class AccountServiceTest {
   void getAccountHandlesException() {
     String uuid = UUID.randomUUID().toString();
 
-    CompletableFuture<AccountDto> result = accountServiceSpy.getAccount(uuid);
+    CompletableFuture<AccountDto> result = accountService.getAccount(uuid);
 
-    result.exceptionallyAsync(e -> {
+    try {
+      result.get();
+    } catch (InterruptedException | ExecutionException e) {
       Assertions.assertTrue(e.getCause() instanceof AccountServiceException);
-      return null;
-    });
+    }
   }
 
   @Test
@@ -139,15 +101,13 @@ class AccountServiceTest {
     when(accountMock.getUuid()).thenReturn(newUUID);
     when(accountMapperMock.toDto(accountMock)).thenReturn(accountDtoMock);
 
-    CompletableFuture<AccountDto> result = accountServiceSpy.addAccount(accountDto);
+    CompletableFuture<AccountDto> result = accountService.addAccount(accountDto);
 
     Assertions.assertEquals(accountDtoMock, result.get());
   }
 
   @Test
   void getAccounts() throws ExecutionException, InterruptedException {
-    // Uses the generated accounts
-
     AccountDto aMockAccountDto = Mockito.mock(AccountDto.class);
     AccountDto bMockAccountDto = Mockito.mock(AccountDto.class);
     AccountDto cMockAccountDto = Mockito.mock(AccountDto.class);
@@ -158,7 +118,7 @@ class AccountServiceTest {
     when(accountMapperMock.toDto(C_ACCOUNT)).thenReturn(cMockAccountDto);
     when(accountMapperMock.toDto(D_ACCOUNT)).thenReturn(dMockAccountDto);
 
-    CompletableFuture<Set<AccountDto>> result = accountServiceSpy.getAccounts();
+    CompletableFuture<Set<AccountDto>> result = accountService.getAccounts();
 
     Assertions.assertTrue(
         result.get().containsAll(
@@ -173,13 +133,13 @@ class AccountServiceTest {
 
     String accountUUIDToRemove = D_ACCOUNT_UUID.toString();
 
-    accountServiceSpy.deleteAccount(accountUUIDToRemove);
+    accountService.deleteAccount(accountUUIDToRemove);
 
     when(accountMapperMock.toDto(A_ACCOUNT)).thenReturn(aMockAccountDto);
     when(accountMapperMock.toDto(B_ACCOUNT)).thenReturn(bMockAccountDto);
     when(accountMapperMock.toDto(C_ACCOUNT)).thenReturn(cMockAccountDto);
 
-    Set<AccountDto> result = accountServiceSpy.getAccounts().get();
+    Set<AccountDto> result = accountService.getAccounts().get();
 
     Assertions.assertEquals(3, result.size());
   }
@@ -187,59 +147,33 @@ class AccountServiceTest {
   @Test
   void updateAccountOwnerId() throws ExecutionException, InterruptedException,
       AccountUpdateException {
-    AccountDto newAccountDto = new AccountDto(null, UUID.randomUUID(), new BigDecimal(10000));
+
+    AccountDto newAccountDto = new AccountDto(null, UUID.randomUUID(),
+        D_ACCOUNT.getBalance().get());
+
     String accountUUIDToUpdate = D_ACCOUNT_UUID.toString();
 
-    doReturn(D_ACCOUNT).when(accountServiceSpy).findAccount(D_ACCOUNT_UUID);
+    Account mappedAccount = new Account(UUID.fromString(accountUUIDToUpdate),
+        newAccountDto.getOwnerUuid(),
+        D_ACCOUNT.getBalance().get());
 
-    Account updatedAccountDetails = new Account(D_ACCOUNT_UUID, newAccountDto.getOwnerUuid(),
-        newAccountDto.getBalance());
-
-    Account updaterAccountMock = Mockito.mock(Account.class);
-
-    when(accountMapperMock.toDomainCreateOrUpdate(newAccountDto)).thenReturn(updaterAccountMock);
-
-    doReturn(updatedAccountDetails).when(accountServiceSpy).updateAccountDetails(D_ACCOUNT,
-        updaterAccountMock);
+    when(accountMapperMock.toDomainCreateOrUpdate(newAccountDto)).thenReturn(mappedAccount);
 
     AccountDto updatedAccountDto = new AccountDto(D_ACCOUNT_UUID, newAccountDto.getOwnerUuid(),
         newAccountDto.getBalance());
 
-    doReturn(updatedAccountDto).when(accountMapperMock).toDto(updatedAccountDetails);
+    when(accountMapperMock.toDto(any(Account.class))).thenReturn(updatedAccountDto);
 
     CompletableFuture<AccountDto> result =
-        accountServiceSpy.updateAccount(accountUUIDToUpdate, newAccountDto);
+        accountService.updateAccount(accountUUIDToUpdate, newAccountDto);
 
     Assertions.assertEquals(newAccountDto.getOwnerUuid(), result.get().getOwnerUuid());
-  }
-
-  @Test
-  void requestTransfer() throws ExecutionException, InterruptedException {
-    BigDecimal sum = new BigDecimal(500);
-    TransferDto transferDto = new TransferDto(B_ACCOUNT_UUID, C_ACCOUNT_UUID, sum);
-
-    doReturn(B_ACCOUNT).when(accountServiceSpy).findAccount(B_ACCOUNT_UUID);
-    doReturn(C_ACCOUNT).when(accountServiceSpy).findAccount(C_ACCOUNT_UUID);
-
-    BigDecimal senderNewBalance = B_ACCOUNT.getBalance().get().subtract(sum);
-    doReturn(CompletableFuture.completedFuture(senderNewBalance))
-        .when(accountServiceSpy)
-        .withdrawFromAccount(B_ACCOUNT, sum);
-
-    BigDecimal receiverNewBalance = C_ACCOUNT.getBalance().get().add(sum);
-    doReturn(CompletableFuture.completedFuture(receiverNewBalance))
-        .when(accountServiceSpy)
-        .topUpAccount(C_ACCOUNT, sum);
-
-    CompletableFuture<BigDecimal> result = accountServiceSpy.requestTransfer(transferDto);
-
-    Assertions.assertEquals(senderNewBalance, result.get());
   }
 
   @Test
   void updateAccountDetails() {
     Account accountToUpdateWith = Mockito.mock(Account.class);
     Assertions.assertThrows(AccountUpdateException.class,
-        () -> accountServiceSpy.updateAccountDetails(A_ACCOUNT, accountToUpdateWith));
+        () -> accountService.updateAccountDetails(A_ACCOUNT, accountToUpdateWith));
   }
 }
