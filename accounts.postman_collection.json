@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "accounts/$UUID",
+          "name": "accounts/:uuid",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -105,7 +105,7 @@
 			"response": []
 		},
 		{
-			"name": "accounts",
+          "name": "accounts/:uuid",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -136,7 +136,7 @@
 			"response": []
 		},
 		{
-			"name": "accounts",
+          "name": "accounts/:uuid",
 			"request": {
 				"method": "DELETE",
 				"header": [],
