@@ -33,7 +33,7 @@ class Utils {
   static String createAccountAndUpdateCleanupList(List<String> listToCleanup) throws IOException {
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"100000\"\n" +
+        "    \"balance\": 100000\n" +
         "}";
 
     String uuidOfCreatedAccount = createAccount(body);
@@ -44,7 +44,7 @@ class Utils {
   static String createAccountAndUpdateCleanupList(List<String> listToCleanup, BigDecimal balance) throws IOException {
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"" + balance + "\"\n" +
+        "    \"balance\": " + balance + "\n" +
         "}";
 
     String uuidOfCreatedAccount = createAccount(body);
@@ -55,7 +55,7 @@ class Utils {
   static String createAccountToDelete() throws IOException {
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"100000\"\n" +
+        "    \"balance\": 100000\n" +
         "}";
 
     return createAccount(body);
@@ -65,7 +65,7 @@ class Utils {
                                    List<String> accountsToCleanup) throws IOException {
     String body = "{\n" +
         "    \"ownerUuid\": \"" + ownerUUID + "\",\n" +
-        "    \"balance\": \"" + balance + "\"\n" +
+        "    \"balance\": " + balance + "\n" +
         "}";
 
     String uuid = createAccount(body);
@@ -106,7 +106,7 @@ class Utils {
     String body = "{\n" +
         "    \"sender\": \"" + senderUuid + "\",\n" +
         "    \"receiver\": \"" + receiverUuid + "\",\n" +
-        "    \"sum\": \"" + sum + "\"\n" +
+        "    \"sum\": " + sum + "\n" +
         "}";
 
     HttpPost request = new HttpPost(HOST_ADDRESS + "/transfers");

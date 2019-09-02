@@ -1,12 +1,17 @@
  # Money Transfer App
  
- Built with:
+ Using:
  1. sparkjava
  2. guice
  3. lombok
  4. junit
  5. mockito
  6. gradle
+ 7. jacoco
+ 8. gson
+ 9. json.schema
+ 10. apache http-client
+ 
  
  ## Installation
  
@@ -37,4 +42,12 @@
  
  The following service contains Jetty embedded, which means it is necessary to start it only by 
  running a script that resides in the path mentioned before.
+ 
+ to generate test coverage report:
+ `./gradlew clean build test jacocoTestReport`
+ available under the following path [build/reports/jacoco/index.html](build/reports/jacoco/index.html)
+ 
+ to run integration tests:
+ * run server
+ * run `./gradlew integrationTest`
  

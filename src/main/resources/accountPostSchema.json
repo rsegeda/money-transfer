@@ -1,0 +1,32 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "accountPostSchema.json",
+  "type": "object",
+  "title": "Account schema",
+  "required": [
+    "ownerUuid",
+    "balance"
+  ],
+  "properties": {
+    "ownerUuid": {
+      "$id": "#/properties/ownerUuid",
+      "type": "string",
+      "title": "The OwnerUUID Schema",
+      "default": "",
+      "examples": [
+        "dd987832-e946-4a6e-8fea-61e9b7ea49b7"
+      ],
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    },
+    "balance": {
+      "$id": "#/properties/balance",
+      "type": "number",
+      "title": "The Balance Schema",
+      "default": 0,
+      "examples": [
+        9000.5
+      ]
+    }
+  }
+}

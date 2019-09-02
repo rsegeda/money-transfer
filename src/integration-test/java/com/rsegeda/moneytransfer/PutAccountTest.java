@@ -46,7 +46,7 @@ class PutAccountTest {
 
     HttpPut request = new HttpPut(HOST_ADDRESS + "/accounts/" + accountUUID);
     String body = "{\n" +
-        "    \"balance\": \"9000\"\n" +
+        "    \"balance\": 9000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -65,7 +65,7 @@ class PutAccountTest {
 
     HttpPut request = new HttpPut(HOST_ADDRESS + "/accounts/" + accountUUID);
     String body = "{\n" +
-        "    \"balance\": \"2000\"\n" +
+        "    \"balance\": 2000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -84,7 +84,7 @@ class PutAccountTest {
 
     HttpPut request = new HttpPut(HOST_ADDRESS + "/accounts/" + accountUUID);
     String body = "{\n" +
-        "    \"balance\": \"9000\"\n" +
+        "    \"balance\": 9000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));

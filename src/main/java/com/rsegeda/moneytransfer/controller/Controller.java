@@ -31,6 +31,9 @@ public class Controller {
   @Setter(onMethod = @__( {@Inject}))
   private TransferService transferService;
 
+  @Setter(onMethod = @__( {@Inject}))
+  private RequestJsonValidator requestJsonValidator;
+
   public void init() {
     get("/healthCheck", (req, res) -> "Service is alive");
 
@@ -43,13 +46,6 @@ public class Controller {
     post("/transfers", this::requestTransfer);
   }
 
-  String deleteAccount(Request request, spark.Response response) {
-    response.type("application/json");
-    accountService.deleteAccount(request.params(":uuid"));
-    response.status(Response.SC_NO_CONTENT);
-    return "Account deleted";
-  }
-
   String getAccount(Request req, spark.Response res) {
     res.type("application/json");
 
@@ -60,34 +56,6 @@ public class Controller {
             return new BodyResponse(StatusResponse.SUCCESSFUL, new Gson().toJsonTree(accountDto));
           }).exceptionally(throwable -> {
             res.status(Response.SC_NOT_FOUND);
-            return new BodyResponse(StatusResponse.FAILED, throwable.getCause().getMessage());
-          }).get();
-
-      return new Gson().toJson(result);
-    } catch (Exception e) {
-      res.status(Response.SC_INTERNAL_SERVER_ERROR);
-      return new Gson().toJson(new BodyResponse(StatusResponse.FAILED, e.getMessage()));
-    }
-  }
-
-  String putAccount(Request req, spark.Response res) {
-    res.type("application/json");
-
-    try {
-      Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-      AccountDto newAccountDto = gson.fromJson(req.body(), AccountDto.class);
-
-      BodyResponse result =
-          accountService
-              .updateAccount(req.params(":uuid"), newAccountDto)
-              .thenApply(accountDto -> {
-                res.status(Response.SC_OK);
-
-                return new BodyResponse(StatusResponse.SUCCESSFUL,
-                    new Gson().toJsonTree(accountDto));
-              }).exceptionally(throwable -> {
-            res.status(Response.SC_NOT_FOUND);
-
             return new BodyResponse(StatusResponse.FAILED, throwable.getCause().getMessage());
           }).get();
 
@@ -119,10 +87,47 @@ public class Controller {
     }
   }
 
+  String deleteAccount(Request request, spark.Response response) {
+    response.type("application/json");
+    accountService.deleteAccount(request.params(":uuid"));
+    response.status(Response.SC_NO_CONTENT);
+    return "Account deleted";
+  }
+
+  String putAccount(Request req, spark.Response res) {
+    res.type("application/json");
+
+    try {
+      requestJsonValidator.validatePutAccountJson(req.body());
+      Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+      AccountDto newAccountDto = gson.fromJson(req.body(), AccountDto.class);
+
+      BodyResponse result =
+          accountService
+              .updateAccount(req.params(":uuid"), newAccountDto)
+              .thenApply(accountDto -> {
+                res.status(Response.SC_OK);
+
+                return new BodyResponse(StatusResponse.SUCCESSFUL,
+                    new Gson().toJsonTree(accountDto));
+              }).exceptionally(throwable -> {
+            res.status(Response.SC_NOT_FOUND);
+
+            return new BodyResponse(StatusResponse.FAILED, throwable.getCause().getMessage());
+          }).get();
+
+      return new Gson().toJson(result);
+    } catch (Exception e) {
+      res.status(Response.SC_INTERNAL_SERVER_ERROR);
+      return new Gson().toJson(new BodyResponse(StatusResponse.FAILED, e.getMessage()));
+    }
+  }
+
   String postAccount(Request req, spark.Response res) {
     res.type("application/json");
 
     try {
+      requestJsonValidator.validatePostAccountJson(req.body());
       Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
       AccountDto accountDto = gson.fromJson(req.body(), AccountDto.class);
       BodyResponse result = accountService.addAccount(accountDto)
@@ -148,6 +153,7 @@ public class Controller {
     res.status(Response.SC_OK);
 
     try {
+      requestJsonValidator.validatePostTransferJson(req.body());
       TransferDto transferDto = new Gson().fromJson(req.body(), TransferDto.class);
       BodyResponse orderResult = transferService
           .transfer(transferDto)

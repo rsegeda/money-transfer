@@ -89,7 +89,7 @@ class PostTransferTest {
   }
 
   @Test
-  void returnsResponseBodyMessage() throws IOException {
+  void returnsResponseBodyFailureMessage() throws IOException {
     String senderUuid = createAccountAndUpdateCleanupList(accountsToCleanup, new BigDecimal(100));
     String receiverUuid = createAccountAndUpdateCleanupList(accountsToCleanup, new BigDecimal(700));
     BigDecimal sum = new BigDecimal(2000);

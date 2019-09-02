@@ -43,7 +43,7 @@ class PostAccountTest {
     HttpPost request = new HttpPost(HOST_ADDRESS + "/accounts");
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"9000\"\n" +
+        "    \"balance\": 9000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -65,7 +65,7 @@ class PostAccountTest {
     HttpPost request = new HttpPost(HOST_ADDRESS + "/accounts");
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"6000\"\n" +
+        "    \"balance\": 6000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -89,7 +89,7 @@ class PostAccountTest {
     HttpPost request = new HttpPost(HOST_ADDRESS + "/accounts");
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"2000\"\n" +
+        "    \"balance\": 2000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -109,7 +109,7 @@ class PostAccountTest {
     HttpPost request = new HttpPost(HOST_ADDRESS + "/accounts");
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"22000\"\n" +
+        "    \"balance\": 22000\n" +
         "}";
 
     request.setEntity(new StringEntity(body));
@@ -130,7 +130,7 @@ class PostAccountTest {
     HttpPost request = new HttpPost(HOST_ADDRESS + "/accounts");
     String body = "{\n" +
         "    \"ownerUuid\": \"" + UUID.randomUUID() + "\",\n" +
-        "    \"balance\": \"222200\"\n" +
+        "    \"balance\": 222200\n" +
         "}";
 
     request.setEntity(new StringEntity(body));

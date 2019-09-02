@@ -44,6 +44,9 @@ class ControllerTest {
   TransferService transferServiceMock;
 
   @Mock
+  RequestJsonValidator requestJsonValidatorMock;
+
+  @Mock
   Request requestMock;
 
   @Mock
@@ -63,6 +66,7 @@ class ControllerTest {
     controller = new Controller();
     controller.setAccountService(accountServiceMock);
     controller.setTransferService(transferServiceMock);
+    controller.setRequestJsonValidator(requestJsonValidatorMock);
   }
 
   @Test

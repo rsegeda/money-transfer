@@ -1,0 +1,43 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "transferPostSchema.json",
+  "type": "object",
+  "title": "Transfer schema",
+  "required": [
+    "sender",
+    "receiver",
+    "sum"
+  ],
+  "properties": {
+    "sender": {
+      "$id": "#/properties/sender",
+      "type": "string",
+      "title": "The SenderUUID Schema",
+      "default": "",
+      "examples": [
+        "7f3b6fb8-8327-47ac-b17f-02c6a6502e66"
+      ],
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    },
+    "receiver": {
+      "$id": "#/properties/receiver",
+      "type": "string",
+      "title": "The ReceiverUUID Schema",
+      "default": "",
+      "examples": [
+        "0f7bc96c-3bf7-40f0-b726-9999db1e5eb8"
+      ],
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    },
+    "sum": {
+      "$id": "#/properties/sum",
+      "type": "number",
+      "title": "The Sum Schema",
+      "default": 0,
+      "examples": [
+        5000.12
+      ]
+    }
+  }
+}

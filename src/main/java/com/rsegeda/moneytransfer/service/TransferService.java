@@ -13,17 +13,14 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TransferService {
 
+  @Setter(onMethod = @__( {@Inject}))
   private AccountService accountService;
-
-  @Inject
-  public void setAccountService(AccountService accountService) {
-    this.accountService = accountService;
-  }
 
   public CompletableFuture<BigDecimal> transfer(TransferDto transferDto) {
     BigDecimal sum = transferDto.getSum();

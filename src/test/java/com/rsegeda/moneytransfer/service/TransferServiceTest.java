@@ -6,6 +6,7 @@ package com.rsegeda.moneytransfer.service;
 
 import com.rsegeda.moneytransfer.controller.dto.TransferDto;
 import com.rsegeda.moneytransfer.exception.IllegalTransferSumException;
+import com.rsegeda.moneytransfer.exception.InsufficientFundException;
 import com.rsegeda.moneytransfer.service.model.Account;
 
 import java.math.BigDecimal;
@@ -78,6 +79,21 @@ class TransferServiceTest {
       transferService.transfer(transferDto).get();
     } catch (IllegalTransferSumException e) {
       Assertions.assertTrue(e.getMessage().startsWith("Sum is less or equal to zero. Value:"));
+    }
+  }
+
+  @Test
+  void requestTransferInsufficientFunds() {
+    BigDecimal moreThanHaveSum = new BigDecimal(1000).add(B_ACCOUNT.getBalance().get());
+    TransferDto transferDto = new TransferDto(B_ACCOUNT_UUID, C_ACCOUNT_UUID, moreThanHaveSum);
+
+    when(accountServiceMock.findAccount(B_ACCOUNT_UUID)).thenReturn(B_ACCOUNT);
+    when(accountServiceMock.findAccount(C_ACCOUNT_UUID)).thenReturn(C_ACCOUNT);
+
+    try {
+      transferService.transfer(transferDto).get();
+    } catch (InterruptedException | ExecutionException e) {
+      Assertions.assertTrue(e.getCause() instanceof InsufficientFundException);
     }
   }
 }
