@@ -27,7 +27,7 @@
  ## Project structure
  
  Application exposes Restful API on Account resource.
- For the sake of simplicity of this task, very simple objects definitions have been created.
+ For the sake of simplicity of this project, very simple objects definitions have been created.
  
  
  ## How to use
